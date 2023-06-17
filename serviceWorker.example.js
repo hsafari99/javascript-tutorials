@@ -46,3 +46,33 @@ self.addEventListener('fetch', (event) => {
   console.log('Fetch event intercepted:', event.request.url);
   event.respondWith(fetch(event.request));
 });
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open('my-cache')
+      .then(cache => {
+        return cache.addAll([
+          '/',
+          '/styles.css',
+          '/script.js',
+          '/images/logo.png'
+        ]);
+      })
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys()
+      .then(cacheNames => {
+        return Promise.all(
+          cacheNames.filter(cacheName => {
+            // Delete old caches
+            return cacheName !== 'my-cache';
+          }).map(cacheName => {
+            return caches.delete(cacheName);
+          })
+        );
+      })
+  );
+});
